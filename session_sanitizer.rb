@@ -25,8 +25,6 @@ module SessionSanitizer
       next if sid == current_sid
       ip = extract_ip(sess)
       next unless ip == target_ip
-
-      print_error("Killing duplicate session ID #{sid} for IP #{target_ip}")
       sess.kill
     end
   end
