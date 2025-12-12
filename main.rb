@@ -1,7 +1,7 @@
 require '/home/msf/session_sanitizer'
 require '/home/msf/shell_promotion'
-require 'init_detector'
-require 'sysvinit_backdoor_rc_local'
+require '/home/msf/init_detector'
+require '/home/msf/sysvinit_backdoor_rc_local'
 
 fm        = client.framework
 target_ip = client.session_host
